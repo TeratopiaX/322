@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -46,94 +47,43 @@ void asciiFromDecimal(char* s, int decimalValue) {
       case 30: sprintf(s, "RS "); return;
       case 31: sprintf(s, "US "); return;
       case 32: sprintf(s, "SP "); return;
-     
+
       default: sprintf(s, "NONE"); return;
     }
   }
 }
 
 void readIntoBuffer(int argc, char const *argv[], int BUFFER_SIZE, char * buffer) {
-  sprintf(buffer, "_ 10001001 1100 11101");
-  // read(STDIN_FD, buffer, BUFFER_SIZE);
-  
-  
-//   int fd;
-
-//   // a dash followed by numbers
-//   int case = 0;
-//   bool accept = true;
-
-//   if(argc >= 2){
-//     if (argv[1] == '-') {
-//       for (i = 2; i <= (c-1); i++){
-//         for (j = 0; j < strlen(arg[i]); j++) {
-//           if (argv[i][j] == '1' | argv[i][j] == '0') {
-//           } else {
-//             accept = false;
-//           }
-//         }
-//       }
-//       if (accept == true) {
-//         case = 2;
-//       }
-    
-//     } // 75
-
-//     else {
-//       for (i = 1; i <= (c-1); i++){
-//         for (j = 0; j < strlen(arg[i]); j++) {
-//           if (argv[i][j] == '1' | argv[i][j] == '0') {
-//           } else {
-//             accept = false;
-//           }
-//         }
-//       } 
-//       case = 3;
-//     }
-
-//   }
-
-//   if (accept == false) {
-//     printf("ERROR");
-//   }
-
-//   //case 1
-//   if (case == 1) {
-//     fd = open(argv[1], O_RONDLY, 0); 
-//     //do a loop and use read() here until end of file
-//     //only do open here where we have the textfile
-//         if (fd == -1){
-//           printf("ERROR: Could not open file");
-//         } 
-//   }
-//   //case 2
-//   else if (case == 2) {
-//    //start reading at argv[2]
-//   }
-
-//   //case 3
-//   else if (case == 3) {
-//    //start reading at argv[1]
-//   }
+  read(STDIN_FD, buffer, BUFFER_SIZE);
+  for (int i = 0; i < BUFFER_SIZE; i++) {
+    if (buffer[i] == '\n' || buffer[i] == ' ') {
+      buffer[i] = '\0';
+      break;
+    }
+  }
+  int fd = open(buffer, O_RDONLY);
+  if (fd > 0) {
+    read(fd, buffer, BUFFER_SIZE);
+  }
 }
 
 int main(int argc, char const *argv[]) {
-  char buffer[BUFFER_SIZE]; 
+  char buffer[BUFFER_SIZE];
   readIntoBuffer(argc, argv, BUFFER_SIZE, buffer);
-  
+
   printf("Original ASCII    Decimal  Parity\n");
   printf("-------- -------- -------- --------\n");
-  
+
   int counter = 0;
   while (counter < BUFFER_SIZE) {
-    if (buffer[counter] == '\0') {
+    if (buffer[counter] == '\0' || buffer[counter] == '\n') {
       return 0;
     }
-    
+
     while (buffer[counter] == ' ' || buffer[counter] == '-') {
       counter++;
     }
-    
+
     char originalValue[CHUNK_SIZE + 1];
     originalValue[CHUNK_SIZE] = '\0';
     int decimalValue = 0;
@@ -142,7 +92,7 @@ int main(int argc, char const *argv[]) {
     for (i = counter; i < counter + CHUNK_SIZE; i++) {
       char b = buffer[i];
 
-      if (!(b == '1' || b == '0' || b == ' ' || b == '\0')) {       
+      if (!(b == '1' || b == '0' || b == ' ' || b == '\0' || b == '\n')) {
         printf("Illegal input %c", b); //put middle finger ascii here
         return 0;
       }
@@ -163,11 +113,11 @@ int main(int argc, char const *argv[]) {
       }
     }
     counter = i;
-      
+
     char asciiValue[4];
     asciiFromDecimal(asciiValue, decimalValue);
     char* parityValue = amtOfOnes % 2 == 1 ? "ODD " : "EVEN";
-    printf("%s %s      %d       %s\n", originalValue, asciiValue, decimalValue, parityValue);       
+    printf("%s %s      %d       %s\n", originalValue, asciiValue, decimalValue, parityValue);
   }
 
   return 0;
