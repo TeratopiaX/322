@@ -1,0 +1,8 @@
+entry1 2/29
+Redid code so that both the parent and the child must use the same function to report its process information.
+
+Looked at the lab requirement doc for the first time. Checked that code uses OTBS spacing and is formatted correctly. 
+
+unsure whether indentation is 2 spaces or 4 spaces. my personal preference is 2 but I will indent my code to be 4 spaces to be safe. 
+
+Also, I have never seen READ.me ever and don't understand that extension. I have only seen README or README.txt
