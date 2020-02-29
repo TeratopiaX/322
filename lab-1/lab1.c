@@ -6,6 +6,12 @@
 #include <time.h>
 #include <unistd.h>
 
+
+/**
+ * Reports info about the current process and its child (if applicable).
+ *
+ * @param childProcId the process id of the current process' child
+ */
 void reportProcInfo(pid_t childProcId) {
     // Wait until the child process is completed and store its return status
     int status;
