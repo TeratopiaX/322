@@ -1,5 +1,9 @@
 /*
-
+Anh Doan
+Ilia Benson 322
+Lab 3
+This lab catches signals and then prints out information
+about those signals such as its process ID and the time it was caught
 */
 
 #include <stdio.h>
