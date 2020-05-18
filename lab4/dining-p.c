@@ -27,7 +27,8 @@ void eat(int position) {
 		return;
 	}
 
-	fprintf(stdout, "Philosopher #%d is eating\n", position); 
+	fprintf(stdout, "Philosopher #%d is eating\n", position);
+	// Sleep for up to 5 seconds
 	usleep(rand() % 5000000);
 }
 
@@ -37,6 +38,7 @@ void think(int position) {
 	}
 
 	fprintf(stdout, "Philosopher #%d is thinking\n", position); 
+	// Sleep for up to 5 seconds
 	usleep(rand() % 5000000);
 }
 
@@ -58,6 +60,7 @@ void signalForSemaphore(sem_t * semaphore) {
 
 void signalHandler(int signal) {
 	if(signal == SIGTERM) {
+		// set global program termination flag
 		terminated = true;
 	}
 }
@@ -77,21 +80,26 @@ int philosopherLoop(
 	sem_t * secondChopstick,
 	sem_t * globalLock) {
 
-	//the structure of philosopher i
 	int cycleCount = 0;
 	do {
+		// set globalLock while acquiring resources
 		waitForSemaphore(globalLock);
+
+		// acquire left and right chopsticks
 		waitForSemaphore(firstChopstick);
 		waitForSemaphore(secondChopstick);
+
+		// release globalLock
 		signalForSemaphore(globalLock);
 
-		/*eat for a while*/
+		// eat for a while
 		eat(position);
 
+		// release left and right chopsticks
 		signalForSemaphore(firstChopstick);
 		signalForSemaphore(secondChopstick);
 
-		/*think for a while*/
+		// think for a while
 		think(position);
 
 		if (terminated) {
@@ -105,6 +113,7 @@ void philosopher(int seats, int position) {
 	char firstChopstickPath[20];
 	char secondChopstickPath[20];
 
+    // determine correct paths for chopsticks
     sprintf(firstChopstickPath,"%s%d", SEM_FILE_ROOT, position);
     sprintf(secondChopstickPath,"%s%d", SEM_FILE_ROOT, (position + 1) % seats);
 
@@ -117,6 +126,8 @@ void philosopher(int seats, int position) {
 
 	fprintf(stderr, "Philosopher #%d completed %d cycles \n", 
 		position, cycleCount);
+
+	// close and unlink all semaphores
 	sem_close(firstChopstick);
 	sem_close(secondChopstick);
 	sem_close(globalLock);
@@ -155,11 +166,13 @@ int main(int argc, char const *argv[])
   	pid_t pid = getpid();
 	fprintf(stderr, "Philosopher #%d: $$ = %d\n", position, pid);
 
+    // register handler for SIGTERM
   	if (signal(SIGTERM, signalHandler) == SIG_ERR) {
         fprintf(stderr, "Can't catch SIGTERM\n");
         return -1;
 	}
 
+    // seed random number generator with current time
 	srand(time(0));
 	philosopher(seats, position);
 	return 0;
